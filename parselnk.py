@@ -26,6 +26,14 @@ flagstrings = [ "Shell item ID list",
                 "Has command line arguments",
                 "Has a custom icon"]
 
+filelocationstrings = ["Total length",
+                       "Pointer to first offset",
+                       "Flags",
+                       "Offset of local volume info",
+                       "Offset of base pathname on local system",
+                       "Offset of network volume info",
+                       "Offset of remaining pathname"]
+
 def windowsTimeToUnix(wintime):
     #Taken from
     #http://code.activestate.com/recipes/303344/
@@ -108,6 +116,52 @@ def parseLnk(thefile):
     junk = struct.unpack("i", data)
     print "Junk2: %x" % junk
 
+    if flagresults[0] == 1:
+        print "Parsing Shell ID list"
+        data = thefile.read(2)
+        length = struct.unpack("H", data)[0]
+        print " Total length of shell ID list: %d" % length
+        data = thefile.read(2)
+        junk = struct.unpack("H", data)[0]
+        count = 2
+        
+        while count < length:
+            #print "Reading %d from the shell ID list" % junk
+            count += junk
+            data = thefile.read(junk - 2)
+            print "  %s" % data
+            data = thefile.read(2)
+            junk = struct.unpack("H", data)[0]
+            
+        if junk != 0:
+            print "Shell ID list didn't end safely. Things will go wrong"
+            
+    if flagresults[1] == 1:
+        print "Parsing file location info"
+        data = thefile.read(4)
+        length = struct.unpack("i", data)[0]
+        print " Total length of file location info: %d" % length
+
+        data = thefile.read(4)
+        junk = struct.unpack("i", data)[0]
+
+        count = 0
+        filelocationflags = []
+
+        while count < 6:
+            count += 1
+            print filelocationstrings[count]
+            data = thefile.read(4)
+            junk = struct.unpack("i", data)[0]
+            if count == 2:
+                filelocationflags = intToFlags(junk, 2)
+                print filelocationflags
+
+            print "  %s" % junk
+
+        
+            
+            
 def main():
     if (len(sys.argv) <= 1):
         print "Provide a file please"
