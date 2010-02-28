@@ -2,6 +2,7 @@
 
 # "Resolve" MAC addresses from an arp table dump on OS X
 # Just a cosmetic dalliance more than anything
+# Requires nmap
 
 import subprocess
 
@@ -34,7 +35,10 @@ def ParseMacs(path="/Users/nosmo/Portage/usr/share/nmap/nmap-mac-prefixes"):
     return macs
 
 def main():
+
+    # Supply a path to the nmap-mac-prefixes here if you want this to work
     macdb = ParseMacs()
+    
     hosts = ParseList()
 
     for i in hosts.keys():
